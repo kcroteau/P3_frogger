@@ -80,48 +80,7 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-         checkCollisions();
-// check to see if the player made it across the board
-        if( player.rowNumber() === 0 ){
-            player = new Player()
-        }
-    }
-
-
-    function checkCollisions(){
-        //console.log( "checking collisions ")
-        // find out what row the player is on ...
-        var playerRow = player.rowNumber();
-
-        // now make a list of all the enemies that are that same row
-        var candidates = [];
-        for( var e in allEnemies ){
-            var enemy  = allEnemies[e];
-            if( enemy.row === playerRow ){
-                candidates.push( enemy );
-            }
-        }
-
-        //console.log( "the candidates are " + candidates );
-        // the bug and the player image are both 101 pix wide. 
-        // find out if the player intersects any of the bug images in the candidate list
-        var collide = false;
-        for( var e in candidates ){
-            var candidate = candidates[e];
-            // bug on left and intersecting?
-            collide = checkLowerBounds( candidate, player ) || checkLowerBounds( player, candidate );
-                        
-        }
-
-        //console.log( collide );
-        if( collide ) {
-            player = new Player();
-        }
-
-    }
-
-    function checkLowerBounds( left , right ) {
-        return left.x < right.x && left.x + 101 > right.x;
+        checkCollisions();
     }
 
     /* This is called by the update function  and loops through all of the
@@ -185,7 +144,11 @@ var Engine = (function(global) {
      * tick. It's purpose is to then call the render functions you have defined
      * on your enemy and player entities within app.js
      */
-    function renderEntities() {
+     function renderEntities() {
+        // Loop through objects within rocks array and call render function
+        rocks.forEach(function(rock) {
+            rock.render();
+        });
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
@@ -213,7 +176,8 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+		'images/Rock.png'
     ]);
     Resources.onReady(init);
 
