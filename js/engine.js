@@ -1,7 +1,7 @@
 /* Engine.js
  * This file provides the game loop functionality (update entities and render),
  * draws the initial game board on the screen, and then calls the update and
- * render methods on your player and enemy objects (defined in your app.js).
+ * render methods on your player and enemy objects (defined in your app.js)
  *
  * A game engine works by drawing the entire game screen over and over, kind of
  * like a flipbook you may have created as a kid. When your player moves across
@@ -14,7 +14,7 @@
  * a little simpler to work with.
  */
 
-var Engine = (function(global) {
+var Engine = (function(global){
     /* Predefine the variables we'll be using within this scope,
      * create the canvas element, grab the 2D context for that canvas
      * set the canvas elements height/width and add it to the DOM.
@@ -43,18 +43,18 @@ var Engine = (function(global) {
             dt = (now - lastTime) / 1000.0;
 
         /* Call our update/render functions, pass along the time delta to
-         * our update function since it may be used for smooth animation.
+         * our update function since it may be used for smooth animation
          */
         update(dt);
         render();
 
         /* Set our lastTime variable which is used to determine the time delta
-         * for the next time this function is called.
+         * for the next time this function is called
          */
         lastTime = now;
 
         /* Use the browser's requestAnimationFrame function to call this
-         * function again as soon as the browser is able to draw another frame.
+         * function again as soon as the browser is able to draw another frame
          */
         win.requestAnimationFrame(main);
     };
@@ -63,7 +63,7 @@ var Engine = (function(global) {
      * particularly setting the lastTime variable that is required for the
      * game loop.
      */
-    function init() {
+    function init(){
         reset();
         lastTime = Date.now();
         main();
@@ -76,11 +76,52 @@ var Engine = (function(global) {
      * the need to add an additional function call here. For now, we've left
      * it commented out - you may or may not want to implement this
      * functionality this way (you could just implement collision detection
-     * on the entities themselves within your app.js file).
+     * on the entities themselves within your app.js file)
      */
-    function update(dt) {
+    function update(dt){
         updateEntities(dt);
         checkCollisions();
+// check to see if the player made it across the board
+        if( player.rowNumber() === 0 ){
+            player = new Player()
+        }
+    }
+
+
+    function checkCollisions(){
+        //console.log( "checking collisions ")
+        // find out what row the player is on
+        var playerRow = player.rowNumber();
+
+        // now make a list of all the enemies that are that same row
+        var candidates = [];
+        for( var e in allEnemies ){
+            var enemy  = allEnemies[e];
+            if( enemy.row === playerRow ){
+                candidates.push( enemy );
+            }
+        }
+
+        //console.log( "the candidates are " + candidates );
+        // the bug and the player image are both 101 pix wide
+        // find out if the player intersects any of the bug images in the candidate list
+        var collide = false;
+        for( var e in candidates ){
+            var candidate = candidates[e];
+            // bug on left and intersecting?
+            collide = checkLowerBounds( candidate, player ) || checkLowerBounds( player, candidate );
+                        
+        }
+
+        //console.log( collide );
+        if( collide ) {
+            player = new Player();
+        }
+
+    }
+
+    function checkLowerBounds(left , right){
+        return left.x < right.x && left.x + 101 > right.x;
     }
 
     /* This is called by the update function  and loops through all of the
@@ -90,16 +131,16 @@ var Engine = (function(global) {
      * the data/properties related to  the object. Do your drawing in your
      * render methods.
      */
-    function updateEntities(dt) {
-        allEnemies.forEach(function(enemy) {
+    function updateEntities(dt){
+        allEnemies.forEach(function(enemy){
             enemy.update(dt);
         });
         player.update();
     }
-
+    
     /* This function initially draws the "game level", it will then call
      * the renderEntities function. Remember, this function is called every
-     * game tick (or loop of the game engine) because that's how games work -
+     * game tick (or loop of the game engine) because that's how games work-
      * they are flipbooks creating the illusion of animation but in reality
      * they are just drawing the entire screen over and over.
      */
@@ -115,6 +156,7 @@ var Engine = (function(global) {
                 'images/grass-block.png',   // Row 1 of 2 of grass
                 'images/grass-block.png'    // Row 2 of 2 of grass
             ],
+            
             numRows = 6,
             numCols = 5,
             row, col;
@@ -132,10 +174,9 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
-            }
+                ctx.drawImage(Resources.get(rowImages[row]),col * 101,row * 83)
+              }
         }
-
 
         renderEntities();
     }
@@ -144,11 +185,7 @@ var Engine = (function(global) {
      * tick. It's purpose is to then call the render functions you have defined
      * on your enemy and player entities within app.js
      */
-     function renderEntities() {
-        // Loop through objects within rocks array and call render function
-        rocks.forEach(function(rock) {
-            rock.render();
-        });
+    function renderEntities() {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
@@ -169,16 +206,16 @@ var Engine = (function(global) {
 
     /* Go ahead and load all of the images we know we're going to need to
      * draw our game level. Then set init as the callback method, so that when
-     * all of these images are properly loaded our game will start.
+     * all of these images are properly loaded our game will start
      */
     Resources.load([
         'images/stone-block.png',
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png',
-		'images/Rock.png'
-    ]);
+        'images/char-boy.png'
+        'images/Rock.png'
+    	]);
     Resources.onReady(init);
 
     /* Assign the canvas' context object to the global variable (the window
